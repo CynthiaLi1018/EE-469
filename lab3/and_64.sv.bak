@@ -1,0 +1,16 @@
+`timescale 1ns/10ps
+
+module and_64 (A, B, R);
+	output logic  [63:0] R;
+	input  logic  [63:0] A, B;
+
+	and #0.05 And_1 (v0, i0, nsel);
+	
+	genvar i;
+	
+	generate
+		for (i=0; i<64; i++) begin : eachAns
+			and mux (.out(DataOut[i]), .in(), .sel(ReadRegister));
+		end
+	endgenerate
+endmodule

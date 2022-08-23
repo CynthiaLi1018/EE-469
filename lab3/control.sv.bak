@@ -1,0 +1,88 @@
+`timescale 1ns/10ps
+module control (Rd, Rn, Rm, Reg2Loc, ALUSrc, ALU0p, RegWrite, MemWrite, BrTaken, UnConBr, SetFlag, MemToReg, MemRead, Imm9, Imm12,
+					 Imm19, Imm26, SHAMT, operation, zero, negative, overflow, carryout, NewZero, NewNegative, NewOverflow, NewCarryout);
+	input logic [31:0] operation;
+	input logic zero, negative, overflow, carryout, NewZero, NewNegative, NewOverflow, NewCarryout;
+	
+	output logic Reg2Loc, RegWrite, MemWrite, BrTaken, UnConBr, SetFlag, MemRead;
+	output logic [2:0] ALU0p;
+	output logic [1:0] ALUSrc, MemToReg;
+	output logic [4:0] Rd, Rn, Rm;
+	output logic [8:0] Imm9;
+	output logic [11:0] Imm12;
+	output logic [18:0] Imm19;
+	output logic [25:0] Imm26;
+	output logic [5:0] SHAMT;
+	
+	assign Rd = operation[4:0];
+	assign Rn = operation[9:5];
+	assign Rm = operation[20:16];
+	assign SHAMT = operation[15:10];
+	
+	assign Imm9 = operation[20:12];
+	assign Imm12 = operation[21:10];
+	assign Imm19 = operation[23:5];
+	assign Imm26 = operation[25:0];
+	
+	parameter ADDI = 	10'b1001000100;          // 0x244
+	parameter ADDS =	11'b10101011000;         // 0x558
+	parameter B = 		6'b000101;               // 0x05;
+	parameter BLT =	8'b01010100;             // 0x54 to choose B.cond
+	parameter CBZ = 	8'b10110100;             // 0xB4
+	parameter LDUR = 	11'b11111000010;         // 0x7c2
+	parameter LSL = 	11'b11010011011;			 // 0x69b
+	parameter LSR = 	11'b11010011010;         // 0x69a
+	parameter STUR = 	11'b11111000000;         // 0x7c0
+	parameter SUBS = 	11'b11101011000;         // 0x758
+	
+	// cntrl				Operation
+	// 000:				result = B
+	// 010:				result = A+B
+	// 011:				result = A-B
+	// 100:				result = A & B
+	// 101:				result = A | B
+	// 110:				result = A XOR B
+	
+	logic [13:0] control;
+	
+	assign control = {Reg2Loc, ALUSrc, MemToReg, RegWrite, MemWrite, SetFlag, BrTaken, UnConBr, ALU0p, MemRead};
+	
+	always_comb begin
+		if (operation[31:22] == ADDI) begin
+			control = 14'bx01101000x0100;
+		end
+		else if (operation[31:21] == ADDS) begin
+			control = 14'b011101010x0100;
+		end
+		else if (operation[31:26] == B) begin
+			control = 14'bxxxxx00010xxx0;
+		end
+		else if (operation[31:24] == BLT && operation[4:0] == 5'b01011) begin
+			control = 14'bxxxxx000x1xxx0;
+			control[5] = (overflow != negative);
+		end
+		else if (operation[31:24] == CBZ) begin
+			control = 14'b111xx000x10000;
+			control[5] = NewZero;
+		end
+		else if (operation[31:21] == LDUR) begin
+			control = 14'bx10011000x0101;
+		end
+		else if (operation[31:21] == LSL) begin		// ?
+			control = 14'bxxx111000xxxx0;
+		end
+		else if (operation[31:21] == LSR) begin		// ?
+			control = 14'bxxx111000xxxx0;
+		end 
+		else if (operation[31:21] == STUR) begin
+			control = 14'b110xx0100x0100;
+		end
+		else if (operation[31:21] == SUBS) begin
+			control = 14'b011101010x0110;
+		end
+		else begin
+			control = 14'b0;
+		end
+	end
+endmodule
+		

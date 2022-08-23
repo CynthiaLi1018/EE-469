@@ -1,0 +1,52 @@
+module DFF64 (q, d, clk, en);
+	output logic [63:0] q;
+	input logic [63:0] d;
+	input logic clk, en;
+	
+	logic [63:0] data;
+	
+	genvar i;
+	generate
+		for (i = 0; i < 64; i++) begin: eachDFF
+			mux2_1 checkEnable (data[i], q, d, en);
+			D_FF dffs (q[i], data[i], 1'b0, clk);
+		end
+	endgenerate
+endmodule
+
+module DFF64_testbench();
+	parameter ClockDelay = 50;
+	logic [63:0] q;
+	logic [63:0] d;
+	logic clk, en;
+	
+	initial begin // Set up the clock
+		clk <= 0;
+		forever #(ClockDelay/2) clk <= ~clk;
+	end
+	
+	DFF64 dut (.*);
+	initial begin
+		// case: en = 0, expect no data transferring
+		en <= 0;
+		d[63:0] = 0;							repeat(2) @(posedge clk);
+		d[0] = 1;								repeat(2) @(posedge clk);
+		d[1] = 1;								repeat(2) @(posedge clk);
+		d[6] = 1;								repeat(2) @(posedge clk);
+		d[9] = 1;								repeat(2) @(posedge clk);
+		d[26]	= 1;								repeat(2) @(posedge clk);
+		d[48] = 1;								repeat(2) @(posedge clk);
+		d[63] = 1;								repeat(2) @(posedge clk);
+		
+		// case: en = 1, expect data transferring: q=d
+		en  <= 1;
+		d[0] = 1;								repeat(2) @(posedge clk);
+		d[1] = 1;								repeat(2) @(posedge clk);
+		d[6] = 1;								repeat(2) @(posedge clk);
+		d[9] = 1;								repeat(2) @(posedge clk);
+		d[26]	= 1;								repeat(2) @(posedge clk);
+		d[48] = 1;								repeat(2) @(posedge clk);
+		d[63] = 1;								repeat(2) @(posedge clk);
+	end
+	
+endmodule

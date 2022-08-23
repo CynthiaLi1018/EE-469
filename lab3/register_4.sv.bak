@@ -1,0 +1,11 @@
+module register_4 (DataIn, DataOut, WriteEn, clk, reset);
+  output logic [3:0] DataOut;  // 4-bit output data
+  input  logic [3:0] DataIn;   // 4-bit input data
+  input  logic WriteEn; 		 // Write Enable flag
+
+  
+  // 4 DFF_E, each represents 1 bit in the register
+  DFF_E dff1 (.q(DataOut[0], .d(DataIn[0]), .reset(reset), .clk(clk), .WriEn(WriteEn);
+  
+  
+endmodule

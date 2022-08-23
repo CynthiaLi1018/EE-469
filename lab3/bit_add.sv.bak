@@ -1,0 +1,9 @@
+module bit_add(A, B, R, SubFlag, Cout, Cin);
+	output logic R, Cout;
+	input  logic A, B, SubFlag, Cout, Cin);
+	logic notB;
+	
+	not #0.05 not1 (notB, B);
+	
+
+endmodule
