@@ -1,0 +1,9 @@
+module fulladd_64 (A, B, R, SubFlag, Cout, Overflow);
+   logic output [63:0] R;
+	logic output Cout, Overflow;
+	logic input  [63:0] A, B;
+	logic input SubFlag;
+	
+   bit_add
+	
+endmodule

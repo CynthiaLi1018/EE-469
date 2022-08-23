@@ -1,0 +1,6 @@
+`timescale 1ns/10ps
+module Mem_Stage(reset, clk, MemWrite, MemRead);
+
+
+
+endmodule

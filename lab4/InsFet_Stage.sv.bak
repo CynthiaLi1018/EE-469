@@ -1,0 +1,7 @@
+`timescale 1ns/10ps
+module InsFet_Stage(reset, clk, );
+
+	// instruction fetch
+	instructmem fetch (.address(PC), .instruction, .clk);  // Use current PC to get the instruction
+	
+endmodule

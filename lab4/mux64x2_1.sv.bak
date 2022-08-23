@@ -1,0 +1,24 @@
+// EE 469 LAB2
+// Hongjiang Cai	1863768
+// Cynthia Li		1839952
+
+// This is the module that creates 64 parallel 2-to-1 mux. Each mux is
+// responsible for selection of each bit of 2 ALU results. The result
+// is depending the input 'cntrl'
+
+module mux64x2_1 (DataOut, DataIn_A, DataIn_B, sel);
+	output logic [63:0] DataOut;
+	input  logic [63:0] DataIn_A, DataIn_B;
+	input  logic sel;
+	
+	// Use generate statement to create 64 parallel 2-to-1 mux. Each mux is
+	// responsible for selection of each bit of 2 ALU results. The result
+	// is depending the input 'sel'
+	genvar i;
+	
+	generate
+		for (i=0; i<64; i++) begin : eachMux
+			mux2_1 eachBit (.out(DataOut[i]), .i0(DataIn_B[i]), .i1(DataIn_A[i]), .sel(sel));
+		end
+	endgenerate
+endmodule

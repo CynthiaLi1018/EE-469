@@ -1,0 +1,90 @@
+`timescale 1ns/10ps
+module cpu_single(reset, clk);
+	input logic reset;
+	input logic clk;
+	logic Reg2Loc, RegWrite, MemWrite, BrTaken, UnCondBr, setFlag, MemRead, zero, negative, overflow, carryout;
+	logic adder1_carryout, adder2_carryout;
+	logic NewNegative, NewZero, NewOverfloa, NewCarryout;
+	logic [1:0] 	ALUSrc, MemToReg;
+	logic [2:0] 	ALUOp;
+	logic [4:0] 	Rd, Rn, Rm;
+	logic [4:0] 	Rd_Rm;
+	logic [5:0] 	SHAMT;
+	
+	logic [8:0] 	Imm9;
+	logic [11:0] 	Imm12;
+	logic [18:0] 	Imm19;
+	logic [25:0] 	Imm26;
+	logic [63:0]	SE9;
+	logic [63:0]	ZE12;
+	logic [63:0]	SE19;
+	logic [63:0]	SE26;
+	
+	logic [31:0]	instruction;
+	
+	logic [63:0]	signExtended4;
+	logic [63:0]	RegWriteData;
+	logic [63:0]	BrTakenMUX_out;
+	logic [63:0]	UnCondBrMUX_out;	
+	logic [63:0]	shifter1_out;	
+	logic [63:0]	shifter2_out;
+	logic [63:0]	adder1_out;
+	logic [63:0]	adder2_out;
+	logic [63:0]	DataA;
+	logic [63:0]	DataB;
+	logic [63:0] 	ALU_in;
+	logic [63:0] 	ALU_out;	
+	logic [63:0] 	datamem_out;
+	logic [63:0]	PC;
+	logic [63:0]	final_PC;
+	
+	
+	// initialize PC / reset PC + update PC
+	mux64x2_1 SetUpPC (final_PC, 64'b0, BrTakenMUX_out, reset);
+	DFFx64 UpdatePC (PC, final_PC, clk, 1'b1);
+	
+	// sign extensions
+	signExtend19 SE_19 (SE19, Imm19);
+	signExtend26 SE_26 (SE26, Imm26);
+	zeroExtend12 ZE_12 (ZE12, Imm12);
+	signExtend9  SE_4  (signExtended4, Imm9);
+	signExtend9  SE_9  (SE9, Imm9);
+	
+	// unconditional branch
+	mux64x2_1 UnConBrMUX (UnConBrMUC_out, SE19, SE26, UnConBr);
+	shifter shifter1 (UnConBrMux_out, 1'b0, 6'b000010, shifter1_out);
+	fulladd_64 adder1 (.A(PC), .B(shifter1_out), .R(adder1_out), .SubFlag(1'b0), .Cout(adder1_carryout), .Overflow());
+	
+	// PC = PC + 4
+	fulladd_64 adder2 (.A(PC), .B(signExtended4), .R(adder2_out), .SubFlag(1'b0), .Cout(adder2_carryout), .Overflow());
+	
+	// branch taken mux
+	mux64x2_1 BrTakenMUX (BrTakenMUX_out, adder1_out, adder2_out, BrTaken);
+	
+	// instruction fetch
+	instructmem fetch (.address(PC), .instruction, .clk);
+	control instructionDecode (Rd, Rn, Rm, Reg2Loc, ALUSrc, ALUOp, RegWrite, MemWrite, BrTaken, UnConBr, SetFlag, MemToReg, MemRead, Imm9, Imm12,
+					 Imm19, Imm26, SHAMT, operation, zero, negative, overflow, carryout, NewZero, NewNegative, NewOverflow, NewCarryout);
+	
+	// register file
+	mux5x2 RdRm (Rd_Rm, Rd, Rm, Reg2Loc); // chose from Rd or Rm as input read register
+	regfile regdata (DataA, DataB, RegWriteData, Rn, Rd_Rm, Rd, RegWrite, clk);
+	
+	// ALU
+	mux64x4_1 ALUSrcMUX (.out(ALU_in), .A(DataB), .B(SE9), .C(ZE12), .D(64'bX), .sel(ALUSrc));
+	ALU alu (.A(DataA), .B(ALU_in), .cntrl(ALUOp), .result(ALU_out), .negative(NewNegative), .zero(NewZero), .overflow(NewOverflow), .carryout(NewCarryout));
+	
+	// flags
+	SetFlag SetNegative 	(.q(negative), .d(NewNegative), .clk, .enable(setFlag));
+	SetFlag SetZero		(.q(zero), .d(NewZero), .clk, .enable(setFlag));
+	SetFlag SetOverflow	(.q(overflow), .d(NewOverflow), .clk, .enable(setFlag));
+	SetFlag SetCarryout	(.q(carryout), .d(NewCarryout), .clk, .enable(setFlag));
+	
+	// shift TO right (HOW TO ADD LEFT)
+	shifter shifter2 (.value(DataA), .direction(1'b1), .distance(SHAMT), .result(shifter2_out));
+	
+	// data memory
+	datamem data (.address(ALU_out), .write_enable(MemWrite), .read_enable(MemRead), .write_data(DataB), .clk, .xfer_size(4'b1000), .read_data(datamem_out));
+	mux64x4_1 MemToRegMUX (.out(RegWriteData), .A(shifter2_out), .B(ALU_out), .C(datamem_out), .D(64'bX), .sel(MemToReg));
+endmodule
+	
