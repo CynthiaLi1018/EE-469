@@ -1,0 +1,5 @@
+module alu (A, B, cntrl, result, negative, zero, overflow, carry_out);
+
+	output logic negative, zero, overflow, carray_out;
+
+endmodule

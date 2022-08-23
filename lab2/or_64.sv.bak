@@ -1,0 +1,14 @@
+`timescale 1ns/10ps
+
+module or_64 (A, B, R);
+	output logic  [63:0] R;
+	input  logic  [63:0] A, B;
+	
+	genvar i;
+	
+	generate
+		for (i=0; i<64; i++) begin : eachAnd
+			or #0.05 or_bit (R[i], A[i], B[i]);
+		end
+	endgenerate
+endmodule

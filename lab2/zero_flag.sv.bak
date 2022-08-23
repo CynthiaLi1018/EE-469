@@ -1,0 +1,3 @@
+module zero_flag (out, R);
+
+endmodule

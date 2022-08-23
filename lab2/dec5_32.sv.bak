@@ -1,0 +1,11 @@
+module dec5_32 (DataOut, sel, En);
+	output logic [31:0] DataOut;
+	input  logic [4:0] sel;
+   input  logic En;
+	
+	logic [1:0] v;
+	
+	dec1_2 dec1 (.DataOut(v), .sel(sel[0]), .En(En));
+	dec4_16 dec2 (.DataOut(DataOut[15:0]),  .sel(sel[4:1]), .En(v[0]));
+	dec4_16 dec3 (.DataOut(DataOut[31:16]), .sel(sel[4:1]), .En(v[1]));
+endmodule

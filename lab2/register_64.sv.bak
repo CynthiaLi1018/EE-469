@@ -1,0 +1,11 @@
+module register_64 (DataIn, DataOut, WriteEn);
+  output logic [63:0] DataOut;  // 64-bit output data
+  input  logic [63:0] DataIn;   // 64-bit input data
+  input  logic WriteEn; 		  // Write Enable flag
+
+  
+  // 64 DFF_E, each represents 1 bit in the register
+  
+  
+  
+endmodule

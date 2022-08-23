@@ -1,0 +1,13 @@
+module register_16 (DataIn, DataOut, WriteEn, clk, reset);
+  output logic [15:0] DataOut;  // 16-bit output data
+  input  logic [15:0] DataIn;   // 16-bit input data
+  input  logic WriteEn; 		 // Write Enable flag
+
+  
+  // 4 4-bit registers, each represents 4 bits data in the register
+  register_16 dff1 (.q(DataOut[0], .d(DataIn[0]), .reset(reset), .clk(clk), .WriEn(WriteEn);
+  register_16 dff2 (.q(DataOut[1], .d(DataIn[1]), .reset(reset), .clk(clk), .WriEn(WriteEn);
+  register_16 dff2 (.q(DataOut[2], .d(DataIn[2]), .reset(reset), .clk(clk), .WriEn(WriteEn);
+  register_16 dff3 (.q(DataOut[3], .d(DataIn[3]), .reset(reset), .clk(clk), .WriEn(WriteEn);
+  
+endmodule

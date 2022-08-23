@@ -1,0 +1,7 @@
+module mux64x32_1 (DataOut, DataIn, ReadRegister);
+	output logic [63:0] DataOut;
+	input  logic [31:0][63:0] DataIn;
+	input  logic [4:0]  ReadRegister;
+
+
+endmodule
