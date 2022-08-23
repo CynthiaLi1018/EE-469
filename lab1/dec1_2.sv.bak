@@ -1,0 +1,9 @@
+module dec1_2 (DataOut, sel, En);
+	output logic [1:0] DataOut;
+	input  logic sel, En;
+
+	logic nsel;
+	
+	not Not_1 (nsel, sel);
+	and And_1 (v0, i0, nsel);
+endmodule
